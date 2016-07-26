@@ -1,11 +1,19 @@
 package com.example.myapexapp;
 
-import com.datatorrent.common.util.BaseOperator;
-import com.datatorrent.api.DefaultInputPort;
-import com.datatorrent.api.annotation.Stateless;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.datatorrent.api.DefaultInputPort;
+import com.datatorrent.api.annotation.Stateless;
+import com.datatorrent.common.util.BaseOperator;
 
 /**
  * Writes tuples to stdout of the container.
@@ -25,6 +33,38 @@ import org.slf4j.LoggerFactory;
 public class XmlRulesOutputOperator extends BaseOperator {
 	private static final Logger logger = LoggerFactory
 			.getLogger(XmlRulesOutputOperator.class);
+	
+	public void printXmlOutput() {
+		  Customer customer = new Customer();
+		  customer.setId(100);
+		  customer.setName("mkyong");
+		  customer.setAge(29);
+		  ArrayList<String> l = new ArrayList<String>();
+		  l.add("one");
+		  HashMap<String, ArrayList<String>> m = new HashMap<String, ArrayList<String>>();
+		  m.put("phone-add", l);
+		  customer.setMap(m);
+		  customer.setRuleOutput("MyName");
+
+		  try {
+
+			  CustomerOutputList customerList = new CustomerOutputList();
+			  customerList.getL().add(customer);
+			File file = new File("C:\\file.xml");
+			JAXBContext jaxbContext = JAXBContext.newInstance(CustomerOutputList.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			// output pretty printed
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+			//jaxbMarshaller.marshal(customer, file);
+			jaxbMarshaller.marshal(customerList, System.out);
+
+		      } catch (JAXBException e) {
+			e.printStackTrace();
+		      }
+
+		}
 
 	/**
 	 * This is the input port which receives the tuples that will be written to
@@ -41,7 +81,8 @@ public class XmlRulesOutputOperator extends BaseOperator {
 				s = String.format(stringFormat, t);
 			}
 			if (!silent) {
-				System.out.println("Hello:" + s);
+				printXmlOutput();
+				//System.out.println("Hello:" + s);
 			}
 			if (debug) {
 				logger.info("Hello:" + s);
